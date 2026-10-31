@@ -122,14 +122,24 @@ def main():
     compare_parser.add_argument("target_pdf", help="Archivo PDF a comparar con la base")
     compare_parser.add_argument("--json", action="store_true", help="Salida en formato JSON")
 
+    # Subcomando: ui / gui
+    ui_parser = subparsers.add_parser("ui", help="Lanzar la interfaz gráfica en el navegador")
+    ui_parser.add_argument("--port", type=int, default=8765, help="Puerto del servidor (por defecto: 8765)")
+    ui_parser.add_argument("--no-browser", action="store_true", help="No abrir automáticamente el navegador")
+
     args = parser.parse_args()
 
     if args.command == "extract":
         run_extract(args.pdf, as_json=args.json)
     elif args.command == "compare":
         run_compare(args.base_pdf, args.target_pdf, as_json=args.json)
+    elif args.command in ("ui", "gui"):
+        from .app_gui import start_server
+        start_server(port=args.port, open_browser=not args.no_browser)
     else:
-        parser.print_help()
+        # Si no se pasan argumentos, iniciar directamente la interfaz gráfica
+        from .app_gui import start_server
+        start_server(port=8765, open_browser=True)
 
 
 if __name__ == "__main__":
